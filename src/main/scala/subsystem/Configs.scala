@@ -43,6 +43,7 @@ class BaseSubsystemConfig extends Config ((site, here, up) => {
   case DebugModuleKey => Some(DefaultDebugModuleParams(site(XLen)))
   case CLINTKey => Some(CLINTParams())
   case PLICKey => Some(PLICParams())
+  case CoherenceKey => new MESICoherence()
 })
 
 /* Composable partial function Configs to set individual parameters */
@@ -382,4 +383,16 @@ class WithScratchpadsOnly extends Config((site, here, up) => {
         nWays = 1,
         scratch = Some(0x80000000L))))
   }
+})
+
+class WithMESICoherence extends Config((site, here, up) => {
+  case CoherenceKey => new MESICoherence
+})
+
+class WithMSICoherence extends Config((site, here, up) => {
+  case CoherenceKey => new MSICoherence
+})
+
+class WithMICoherence extends Config((site, here, up) => {
+  case CoherenceKey => new MICoherence
 })
