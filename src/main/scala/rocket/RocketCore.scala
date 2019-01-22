@@ -835,6 +835,7 @@ class Rocket(implicit p: Parameters) extends CoreModule()(p)
 
 class RegFile(n: Int, w: Int, zero: Boolean = false) {
   private val rf = Mem(n, UInt(width = w))
+  chisel3.experimental.annotate(midas.targetutils.MemModelAnnotation(rf))
   private def access(addr: UInt) = rf(~addr(log2Up(n)-1,0))
   private val reads = ArrayBuffer[(UInt,UInt)]()
   private var canRead = true

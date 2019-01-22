@@ -694,6 +694,7 @@ class FPU(cfg: FPUParams)(implicit p: Parameters) extends FPUModule()(p) {
 
   // regfile
   val regfile = Mem(32, Bits(width = fLen+1))
+  chisel3.experimental.annotate(midas.targetutils.MemModelAnnotation(regfile))
   when (load_wb) {
     val wdata = recode(load_wb_data, load_wb_double)
     regfile(load_wb_tag) := wdata
