@@ -53,7 +53,7 @@ class TLBResp(implicit p: Parameters) extends CoreBundle()(p) {
 
 case class TLBConfig(
     nEntries: Int,
-    nSectors: Int = 4,
+    nSectors: Int = 1, // non-sectored TLB for test chip validation
     nSuperpageEntries: Int = 4)
 
 class TLB(instruction: Boolean, lgMaxSize: Int, cfg: TLBConfig)(implicit edge: TLEdgeOut, p: Parameters) extends CoreModule()(p) {
