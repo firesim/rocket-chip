@@ -137,7 +137,10 @@ class RocketTileModuleImp(outer: RocketTile) extends BaseTileModuleImp(outer)
 
   if (outer.roccs.size > 0) {
     cmdRouter.get.io.in <> core.io.rocc.cmd
-    outer.roccs.foreach(_.module.io.exception := core.io.rocc.exception)
+    outer.roccs.foreach { rocc =>
+      rocc.module.io.exception := core.io.rocc.exception
+      rocc.module.io.sfence := core.io.rocc.sfence
+    }
     core.io.rocc.resp <> respArb.get.io.out
     core.io.rocc.busy <> (cmdRouter.get.io.busy || outer.roccs.map(_.module.io.busy).reduce(_ || _))
     core.io.rocc.interrupt := outer.roccs.map(_.module.io.interrupt).reduce(_ || _)

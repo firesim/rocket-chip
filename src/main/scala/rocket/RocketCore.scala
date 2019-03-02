@@ -717,6 +717,7 @@ class Rocket(implicit p: Parameters) extends CoreModule()(p)
   io.rocc.cmd.bits.inst := new RoCCInstruction().fromBits(wb_reg_inst)
   io.rocc.cmd.bits.rs1 := wb_reg_wdata
   io.rocc.cmd.bits.rs2 := wb_reg_rs2
+  io.rocc.sfence := io.imem.sfence
 
   // evaluate performance counters
   val icache_blocked = !(io.imem.resp.valid || RegNext(io.imem.resp.valid))

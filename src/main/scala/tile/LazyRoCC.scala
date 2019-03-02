@@ -44,6 +44,7 @@ class RoCCCoreIO(implicit p: Parameters) extends CoreBundle()(p) {
   val busy = Bool(OUTPUT)
   val interrupt = Bool(OUTPUT)
   val exception = Bool(INPUT)
+  val sfence = Valid(new SFenceReq).flip
 }
 
 class RoCCIO(val nPTWPorts: Int)(implicit p: Parameters) extends RoCCCoreIO()(p) {
