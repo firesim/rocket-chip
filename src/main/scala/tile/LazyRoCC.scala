@@ -52,6 +52,7 @@ class RoCCIO(val nPTWPorts: Int)(implicit p: Parameters) extends RoCCCoreIO()(p)
   val ptw = Vec(nPTWPorts, new TLBPTWIO)
   val fpu_req = Decoupled(new FPInput)
   val fpu_resp = Decoupled(new FPResult).flip
+  val dcacheSnoop = Valid(new HellaCacheSnoopBundle).flip
 }
 
 /** Base classes for Diplomatic TL2 RoCC units **/

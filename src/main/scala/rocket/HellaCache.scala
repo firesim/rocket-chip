@@ -149,6 +149,11 @@ class HellaCachePerfEvents extends Bundle {
   val storeBufferEmptyAfterStore = Bool()
 }
 
+class HellaCacheSnoopBundle(implicit p: Parameters) extends CoreBundle {
+  val addr = UInt(width = paddrBits)
+  val rw   = Bool()
+}
+
 // interface between D$ and processor/DTLB
 class HellaCacheIO(implicit p: Parameters) extends CoreBundle()(p) {
   val req = Decoupled(new HellaCacheReq)
@@ -205,6 +210,7 @@ class HellaCacheBundle(val outer: HellaCache)(implicit p: Parameters) extends Co
   val cpu = (new HellaCacheIO).flip
   val ptw = new TLBPTWIO()
   val errors = new DCacheErrors
+  val snoop = Valid(new HellaCacheSnoopBundle)
 }
 
 class HellaCacheModule(outer: HellaCache) extends LazyModuleImp(outer)

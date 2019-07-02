@@ -492,6 +492,10 @@ class DCacheModule(outer: DCache) extends HellaCacheModule(outer) {
   tl_out_a.valid := !io.cpu.s2_kill && ((s2_valid_cached_miss && (Bool(cacheParams.acquireBeforeRelease) || !s2_victim_dirty)) || s2_valid_uncached_pending)
   tl_out_a.bits := Mux(!s2_uncached, acquire(s2_vaddr, s2_req.addr, s2_grow_param), Mux(!s2_write, get, Mux(!s2_read, put, atomics)))
 
+  io.snoop.valid := tl_out_a.fire() && s2_valid_cached_miss
+  io.snoop.bits.addr := tl_out_a.bits.address
+  io.snoop.bits.rw   := tl_out_a.bits.param =/= TLPermissions.NtoB
+
   // Set pending bits for outstanding TileLink transaction
   val a_sel = UIntToOH(a_source, maxUncachedInFlight+mmioOffset) >> mmioOffset
   when (tl_out_a.fire()) {
