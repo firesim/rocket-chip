@@ -825,7 +825,8 @@ class NonBlockingDCacheModule(outer: NonBlockingDCache) extends HellaCacheModule
       lrsc_count := 0
     }
   }
-  when (s2_valid_masked && !s2_hit && s2_lrsc_addr_match) {
+  val s2_real_miss = !(s2_tag_match && s2_has_permission)
+  when (s2_valid_masked && s2_real_miss && s2_lrsc_addr_match) {
     lrsc_count := 0
   }
 
