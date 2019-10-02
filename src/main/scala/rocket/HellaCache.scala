@@ -149,10 +149,18 @@ class HellaCachePerfEvents extends Bundle {
   val storeBufferEmptyAfterStore = Bool()
 }
 
-class HellaCacheSnoopBundle(implicit p: Parameters) extends CoreBundle {
-  val addr = UInt(width = paddrBits)
-  val rw   = Bool()
+abstract class AbstractSnoopBundle extends Bundle {
+  def paddrBits: Int
+  lazy val addr = UInt(width = paddrBits)
+  lazy val rw   = Bool()
 }
+
+class SnoopBundle(implicit val edge: TLEdge) extends AbstractSnoopBundle {
+  def paddrBits = edge.bundle.addressBits
+}
+
+class HellaCacheSnoopBundle(implicit val p: Parameters)
+  extends AbstractSnoopBundle with HasCoreParameters
 
 // interface between D$ and processor/DTLB
 class HellaCacheIO(implicit p: Parameters) extends CoreBundle()(p) {
