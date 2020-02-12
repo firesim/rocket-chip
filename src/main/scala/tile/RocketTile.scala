@@ -47,6 +47,7 @@ class RocketTile private(
     with HasLazyRoCC  // implies CanHaveSharedFPU with CanHavePTW with HasHellaCache
     with HasHellaCache
     with HasICacheFrontend
+    with CanHaveL1Prefetcher
 {
   // Private constructor ensures altered LazyModule.p is used implicitly
   def this(params: RocketTileParams, crossing: TileCrossingParamsLike, lookup: LookupByHartIdImpl)(implicit p: Parameters) =
@@ -134,7 +135,8 @@ class RocketTile private(
 class RocketTileModuleImp(outer: RocketTile) extends BaseTileModuleImp(outer)
     with HasFpuOpt
     with HasLazyRoCCModule
-    with HasICacheFrontendModule {
+    with HasICacheFrontendModule
+    with CanHaveL1PrefetcherModule {
   Annotated.params(this, outer.rocketParams)
 
   val core = Module(new Rocket(outer)(outer.p))
@@ -186,6 +188,19 @@ class RocketTileModuleImp(outer: RocketTile) extends BaseTileModuleImp(outer)
 
   // Rocket has higher priority to DTIM than other TileLink clients
   outer.dtim_adapter.foreach { lm => dcachePorts += lm.module.io.dmem }
+
+  // CS152: Connect the L1 prefetcher
+  prefetchPort.foreach { dmem =>
+    dmem.req.bits.dprv := core.io.dmem.req.bits.dprv
+    dcachePorts += dmem
+  }
+  prefetchOpt.foreach { pfu =>
+    pfu.io.cpu.req.valid := core.io.dmem.req.fire()
+    pfu.io.cpu.req.bits := core.io.dmem.req.bits
+    val s1_valid = RegNext(pfu.io.cpu.req.valid, false.B)
+    val s2_valid = RegNext(s1_valid && !core.io.dmem.s1_kill, false.B)
+    pfu.io.cpu.miss := s2_valid && !core.io.dmem.resp.valid && !(core.io.dmem.s2_kill || core.io.dmem.s2_nack)
+  }
 
   // TODO eliminate this redundancy
   val h = dcachePorts.size
