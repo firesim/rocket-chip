@@ -43,6 +43,7 @@ trait HasNonDiplomaticTileParameters {
   def usingBTB: Boolean = tileParams.btb.isDefined && tileParams.btb.get.nEntries > 0
   def usingPTW: Boolean = usingVM
   def usingDataScratchpad: Boolean = tileParams.dcache.flatMap(_.scratch).isDefined
+  def usingPrefetcher: Boolean = p(BuildL1Prefetcher).isDefined
 
   def xLen: Int = p(XLen)
   def xBytes: Int = xLen / 8
@@ -68,7 +69,7 @@ trait HasNonDiplomaticTileParameters {
 
   // TODO make HellaCacheIO diplomatic and remove this brittle collection of hacks
   //                  Core   PTW                DTIM                    coprocessors           
-  def dcacheArbPorts = 1 + usingVM.toInt + usingDataScratchpad.toInt + p(BuildRoCC).size + tileParams.core.useVector.toInt
+  def dcacheArbPorts = 1 + usingVM.toInt + usingDataScratchpad.toInt + p(BuildRoCC).size + tileParams.core.useVector.toInt + usingPrefetcher.toInt
 
   // TODO merge with isaString in CSR.scala
   def isaDTS: String = {
