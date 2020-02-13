@@ -419,14 +419,15 @@ class MSHRFile(implicit edge: TLEdgeOut, p: Parameters) extends L1HellaCacheModu
     mshr
   }
 
-  mmio_alloc_arb.io.out.ready := io.req.valid && !cacheable
+  val prefetch = isPrefetch(io.req.bits.cmd)
+  mmio_alloc_arb.io.out.ready := io.req.valid && !cacheable && !prefetch
 
   TLArbiter.lowestFromSeq(edge, io.mem_acquire, mshrs.map(_.io.mem_acquire) ++ mmios.map(_.io.mem_access))
   TLArbiter.lowestFromSeq(edge, io.mem_finish,  mshrs.map(_.io.mem_finish))
 
   io.resp <> resp_arb.io.out
   io.req.ready := Mux(!cacheable,
-                    mmio_rdy,
+                    mmio_rdy || prefetch,
                     sdq_rdy && Mux(idx_match, tag_match && sec_rdy, pri_rdy))
   io.secondary_miss := idx_match
   io.refill := refillMux(io.mem_grant.bits.source)
