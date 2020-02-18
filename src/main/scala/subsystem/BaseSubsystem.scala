@@ -30,10 +30,12 @@ abstract class BareSubsystem(implicit p: Parameters) extends LazyModule with Bin
 abstract class BareSubsystemModuleImp[+L <: BareSubsystem](_outer: L) extends LazyModuleImp(_outer) {
   val outer = _outer
   ElaborationArtefacts.add("graphml", outer.graphML)
-  ElaborationArtefacts.add("dts", outer.dts)
   ElaborationArtefacts.add("json", outer.json)
   ElaborationArtefacts.add("plusArgs", PlusArgArtefacts.serialize_cHeader)
-  println(outer.dts)
+  if (p(DTSModel).nonEmpty) {
+    ElaborationArtefacts.add("dts", outer.dts)
+    println(outer.dts)
+  }
 }
 
 
