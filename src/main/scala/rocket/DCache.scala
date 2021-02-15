@@ -1046,6 +1046,7 @@ class DCacheModule(outer: DCache) extends HellaCacheModule(outer) {
   io.cpu.perf.acquire := edge.done(tl_out_a)
   io.cpu.perf.release := edge.done(tl_out_c)
   io.cpu.perf.grant := tl_out.d.valid && d_last
+  io.cpu.perf.prefetch := false.B
   io.cpu.perf.tlbMiss := io.ptw.req.fire()
   io.cpu.perf.storeBufferEmptyAfterLoad := !(
     (s1_valid && s1_write) ||

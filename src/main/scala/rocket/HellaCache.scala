@@ -151,6 +151,7 @@ class HellaCachePerfEvents extends Bundle {
   val acquire = Bool()
   val release = Bool()
   val grant = Bool()
+  val prefetch = Bool()
   val tlbMiss = Bool()
   val blocked = Bool()
   val canAcceptStoreThenLoad = Bool()

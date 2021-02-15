@@ -165,7 +165,8 @@ class Rocket(tile: RocketTile)(implicit p: Parameters) extends CoreModule()(p)
       ("D$ release", () => io.dmem.perf.release),
       ("ITLB miss", () => io.imem.perf.tlbMiss),
       ("DTLB miss", () => io.dmem.perf.tlbMiss),
-      ("L2 TLB miss", () => io.ptw.perf.l2miss)))))
+      ("L2 TLB miss", () => io.ptw.perf.l2miss),
+      ("D$ prefetch miss", () => io.dmem.perf.prefetch)))))
 
   val pipelinedMul = usingMulDiv && mulDivParams.mulUnroll == xLen
   val decode_table = {

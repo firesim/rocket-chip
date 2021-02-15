@@ -147,6 +147,7 @@ class MSHR(id: Int)(implicit edge: TLEdgeOut, p: Parameters) extends L1HellaCach
     val mem_acquire  = Decoupled(new TLBundleA(edge.bundle))
     val mem_grant = Valid(new TLBundleD(edge.bundle)).flip
     val mem_finish = Decoupled(new TLBundleE(edge.bundle))
+    val mem_prefetch = Bool(OUTPUT)
 
     val refill = new L1RefillReq().asOutput // Data is bypassed
     val meta_read = Decoupled(new L1MetaReadReq)
@@ -286,6 +287,7 @@ class MSHR(id: Int)(implicit edge: TLEdgeOut, p: Parameters) extends L1HellaCach
                                 toAddress = Cat(io.tag, req_idx) << blockOffBits,
                                 lgSize = lgCacheBlockBytes,
                                 growPermissions = grow_param)._2
+  io.mem_prefetch := edge.done(io.mem_acquire) && isPrefetch(req.cmd)
 
   io.meta_read.valid := state === s_drain_rpq
   io.meta_read.bits.idx := req_idx
@@ -311,6 +313,7 @@ class MSHRFile(implicit edge: TLEdgeOut, p: Parameters) extends L1HellaCacheModu
     val mem_acquire  = Decoupled(new TLBundleA(edge.bundle))
     val mem_grant = Valid(new TLBundleD(edge.bundle)).flip
     val mem_finish = Decoupled(new TLBundleE(edge.bundle))
+    val mem_prefetch = Bool(OUTPUT)
 
     val refill = new L1RefillReq().asOutput
     val meta_read = Decoupled(new L1MetaReadReq)
@@ -424,6 +427,8 @@ class MSHRFile(implicit edge: TLEdgeOut, p: Parameters) extends L1HellaCacheModu
 
   TLArbiter.lowestFromSeq(edge, io.mem_acquire, mshrs.map(_.io.mem_acquire) ++ mmios.map(_.io.mem_access))
   TLArbiter.lowestFromSeq(edge, io.mem_finish,  mshrs.map(_.io.mem_finish))
+
+  io.mem_prefetch := mshrs.map(_.io.mem_prefetch).orR
 
   io.resp <> resp_arb.io.out
   io.req.ready := Mux(!cacheable,
@@ -1008,8 +1013,9 @@ class NonBlockingDCacheModule(outer: NonBlockingDCache) extends HellaCacheModule
   io.cpu.s2_paddr := s2_req.addr
 
   // performance events
-  io.cpu.perf.acquire := edge.done(tl_out.a)
+  io.cpu.perf.acquire := edge.done(tl_out.a) && !mshrs.io.mem_prefetch
   io.cpu.perf.release := edge.done(tl_out.c)
+  io.cpu.perf.prefetch := mshrs.io.mem_prefetch
   io.cpu.perf.tlbMiss := io.ptw.req.fire()
 
   // no clock-gating support
